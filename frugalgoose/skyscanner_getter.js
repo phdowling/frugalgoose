@@ -13,14 +13,6 @@ var routesUrl = "http://partners.api.skyscanner.net/apiservices/browseroutes/v1.
 var suggestUrl = "http://partners.api.skyscanner.net/apiservices/autosuggest/v1.0/GE/EUR/EN/?query={0}&apiKey={1}";
 var referralUrl = "http://partners.api.skyscanner.net/apiservices/referral/v1.0/GE/EUR/EN/{0}/{1}/2016-10-18/2016-10-25?apiKey={2}";
 
-var CONTINENTS_COUNTRIES_MAP = {
-    EU: ['DE-sky', 'UK-sky', 'IT-sky', 'FR-sky'],
-    AF: ['ZA-sky'],
-    AS: ['CN-sky'],
-    NA: ['US-sky', 'CA-sky'],
-    SA: ['AR-sky'],
-    OC: ['AU-sky', 'NZ-sky']
-};
 
 function testRequest() {
     request('http://www.google.com', function (error, response, body) {
@@ -37,11 +29,12 @@ function getCheapeastPlacesFromPlaceToContinent(from, to, callback) {
         return routesUrl.format(from, country, skyscannerKey);
     });
 
-    async.map(urls, performGet, function (error, result) {
+    async.map(urls, performGetIgnoreError, function (error, result) {
         if (error) {
-            console.log("Error getting places from: " + from + " to: " + to);
+            console.log("Error getting places from: " + from + " to: " + to + ". Error: " + error.toString());
             callback(error)
         } else {
+            result = result.filter(function(n){ return n != null });
             callback(null, parseRoutesForCheapestDestinations(result.map(function(jsonString) {
                 return JSON.parse(jsonString);
             })));
@@ -142,25 +135,31 @@ function getBookingUrl(from, to, callback) {
     });
 }
 
-function performGet(url, callback) {
+function performGet(url, callback, ignoreError) {
     request(url, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             callback(null, body);
         } else {
-            if (error) {
+            if (!ignoreError && error) {
                 console.log("GET Error. Statuscode: " + response.statusCode + ". Error: " + error.toString());
                 callback(error);
 
             }
-            console.log("GET bad statuscode. Statuscode: " + response.statusCode);
-            callback(new Error("Bad statuscode"));
+            if (!ignoreError) {
+                console.log("GET bad statuscode. Statuscode: " + response.statusCode);
+                callback(new Error("Bad statuscode"));
+            }
+            callback(null, null);
         }
     })
+}
+
+function performGetIgnoreError(url, callback) {
+    performGet(url, callback, true);
 }
 
 module.exports = {testRequest: testRequest,
     getCheapeastPlacesFromPlaceToContinent: getCheapeastPlacesFromPlaceToContinent,
     getCheapeastPlacesFromPlaceToCountry: getCheapeastPlacesFromPlaceToCountry,
     suggestId: suggestId,
-    getBookingUrl: getBookingUrl,
-    CONTINENTS_COUNTRIES_MAP: CONTINENTS_COUNTRIES_MAP};
+    getBookingUrl: getBookingUrl};
