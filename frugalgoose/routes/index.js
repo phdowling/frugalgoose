@@ -4,10 +4,12 @@
  */
 
 var skyscanner_getter = require('../skyscanner_getter');
+var yelp_getter = require('../yelp_getter');
 
 exports.index = function(req, res){
-    res.render('index', { title: 'Express', foo: {bar:'baz'} });
-    skyscanner_getter.testRequest();
-    console.log(skyscanner_getter.suggestId("Germany"));
-    skyscanner_getter.getCheapeastPlacesFromPlaceToContinent('BRE-sky', skyscanner_getter.CONTINENTS_COUNTRIES_MAP.EU);
+
+    // skyscannerGetter.testRequest();
+    // console.log(skyscannerGetter.suggestId("Germany"));
+    // skyscannerGetter.getCheapeastPlacesFromPlaceToContinent('BRE-sky', skyscannerGetter.CONTINENTS_COUNTRIES_MAP.EU);
+    yelp_getter.testRequest();
 };

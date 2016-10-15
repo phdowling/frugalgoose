@@ -4,19 +4,9 @@
 
 var config = require('./config.json');
 
-String.prototype.format = function() {
-    var s = this,
-        i = arguments.length;
-
-    while (i--) {
-        s = s.replace(new RegExp('\\{' + i + '\\}', 'gm'), arguments[i]);
-    }
-    return s;
-};
-
-
 var request = require('request');
 var async = require('async');
+require('./string_format');
 var skyscannerKey = config.skyscannerKey;
 
 var routesUrl = "http://partners.api.skyscanner.net/apiservices/browseroutes/v1.0/GE/EUR/EN/{0}/{1}/anytime/anytime?apiKey={2}";
@@ -34,11 +24,10 @@ var CONTINENTS_COUNTRIES_MAP = {
 function testRequest() {
     request('http://www.google.com', function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            console.log(routesUrl); // Show the HTML for the Google homepage.
+            console.log(body); // Show the HTML for the Google homepage.
         } else {
             console.log("GET Error. Statuscode: " + response.statusCode + ". Error: " + error.toString());
         }
-
     })
 }
 
@@ -143,12 +132,12 @@ function performGet(url, callback) {
 function suggestId(query, callback) {
     var url = suggestUrl.format(query, skyscannerKey);
 
-    async.map([url], performGet, function (error, result) {
+    performGet(url, function (error, result) {
         if (error) {
             console.log("Error getting places from: " + from + " to: " + to);
             callback(error);
         } else {
-           callback(null, JSON.parse(result[0]).Places[0].PlaceId);
+            callback(null, JSON.parse(result).Places[0].PlaceId);
         }
     });
 }

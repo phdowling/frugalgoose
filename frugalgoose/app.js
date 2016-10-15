@@ -5,12 +5,12 @@
 
 var express = require('express');
 var routes = require('./routes');
-var destination = require('./routes/destination')
-var user = require('./routes/user');
+var destination = require('./routes/destination');
+var thing = require('./routes/thing');
 var http = require('http');
 var path = require('path');
 var errorHandler = require('errorhandler');
-var logger = require('morgan')
+var logger = require('morgan');
 
 // This should refer to the local React and gets installed via `npm install` in
 // the example.
@@ -36,8 +36,8 @@ app.locals.qaz = 'qut';
 
 app.get('/', routes.index);
 app.get('/destinations', destination.destinations);
-// app.get('/things', routes.things)
-app.get('/users', user.list);
+app.get('/things', thing.things);
+app.get('/hotels', thing.hotels);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

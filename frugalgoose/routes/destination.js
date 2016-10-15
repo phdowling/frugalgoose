@@ -1,11 +1,11 @@
 
-var skyscanner_getter = require('../skyscanner_getter');
+var skyscannerGetter = require('../skyscanner_getter');
 
 exports.destinations = function(req, res) {
 
     if (req.query.hasOwnProperty("from") && req.query.hasOwnProperty("to")) {
 
-        skyscanner_getter.suggestId(req.query.from, function(error, fromId) {
+        skyscannerGetter.suggestId(req.query.from, function(error, fromId) {
             if (error) {
                 res.writeHead(500);
                 res.end();
@@ -27,27 +27,27 @@ exports.destinations = function(req, res) {
 
                 switch(req.query.to.toLowerCase()) {
                     case "europe":
-                        skyscanner_getter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscanner_getter.CONTINENTS_COUNTRIES_MAP.EU, placesCallback);
+                        skyscannerGetter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscannerGetter.CONTINENTS_COUNTRIES_MAP.EU, placesCallback);
                         break;
                     case "asia":
-                        skyscanner_getter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscanner_getter.CONTINENTS_COUNTRIES_MAP.AS, placesCallback);
+                        skyscannerGetter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscannerGetter.CONTINENTS_COUNTRIES_MAP.AS, placesCallback);
                         break;
                     case "oceania":
-                        skyscanner_getter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscanner_getter.CONTINENTS_COUNTRIES_MAP.OC, placesCallback);
+                        skyscannerGetter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscannerGetter.CONTINENTS_COUNTRIES_MAP.OC, placesCallback);
                         break;
                     case "south america":
-                        skyscanner_getter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscanner_getter.CONTINENTS_COUNTRIES_MAP.SA, placesCallback);
+                        skyscannerGetter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscannerGetter.CONTINENTS_COUNTRIES_MAP.SA, placesCallback);
                         break;
                     case "north america":
-                        skyscanner_getter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscanner_getter.CONTINENTS_COUNTRIES_MAP.NA, placesCallback);
+                        skyscannerGetter.getCheapeastPlacesFromPlaceToContinent(fromId, skyscannerGetter.CONTINENTS_COUNTRIES_MAP.NA, placesCallback);
                         break;
                     default:
-                        skyscanner_getter.suggestId(req.query.to, function(error, toId) {
+                        skyscannerGetter.suggestId(req.query.to, function(error, toId) {
                             if (error) {
                                 res.writeHead(500);
                                 res.end();
                             } else {
-                                skyscanner_getter.getCheapeastPlacesFromPlaceToCountry(fromId, toId, placesCallback);
+                                skyscannerGetter.getCheapeastPlacesFromPlaceToCountry(fromId, toId, placesCallback);
                             }
                         });
 
