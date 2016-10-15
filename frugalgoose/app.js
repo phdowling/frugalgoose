@@ -36,6 +36,7 @@ app.locals.qaz = 'qut';
 
 app.get('/', routes.index);
 app.get('/destinations', destination.destinations);
+app.get('/bookingUrl', destination.bookingUrl);
 app.get('/things', thing.things);
 app.get('/hotels', thing.hotels);
 

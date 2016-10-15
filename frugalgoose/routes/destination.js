@@ -62,25 +62,33 @@ exports.destinations = function(req, res) {
     }
 };
 
-exports.findFlights = function(req, res) {
+exports.bookingUrl = function(req, res) {
     if (req.query.hasOwnProperty("from") && req.query.hasOwnProperty("to")) {
         skyscannerGetter.suggestId(req.query.from, function(error, fromId) {
             if (error) {
+                console.log("Error getting booking URL: " + error.toString());
                 res.writeHead(500);
                 res.end();
             } else {
                 skyscannerGetter.suggestId(req.query.to, function(error, toId) {
                     if (error) {
+                        console.log("Error getting booking URL: " + error.toString());
                         res.writeHead(500);
                         res.end();
                     } else {
                         skyscannerGetter.getBookingUrl(fromId, toId, function (error, url) {
-
+                            if (error) {
+                                console.log("Error getting booking URL: " + error.toString());
+                                res.writeHead(500);
+                                res.end();
+                            } else {
+                                res.setHeader('Content-Type', 'application/json');
+                                res.writeHead(200);
+                                res.write(JSON.stringify({url: url}));
+                                res.end();
+                            }
                         });
-                        // res.setHeader('Content-Type', 'application/json');
-                        // res.writeHead(200);
-                        // res.write(JSON.stringify(places));
-                        // res.end();
+
                     }
                 });
 
