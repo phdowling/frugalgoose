@@ -2,6 +2,7 @@
  * Created by Felix on 15/10/2016.
  */
 
+var config = require('./config.json');
 
 String.prototype.format = function() {
     var s = this,
@@ -16,21 +17,10 @@ String.prototype.format = function() {
 
 var request = require('request');
 var async = require('async');
-var skyscannerKey = "prtl6749387986743898559646983194";
-var src = "LON";
-var dest = "GE";
+var skyscannerKey = config.skyscannerKey;
 
 var routesUrl = "http://partners.api.skyscanner.net/apiservices/browseroutes/v1.0/GE/EUR/EN/{0}/{1}/anytime/anytime?apiKey={2}";
 var suggestUrl = "http://partners.api.skyscanner.net/apiservices/autosuggest/v1.0/GE/EUR/EN/?query={0}&apiKey={1}";
-
-var CONTINENTS = {
-    EU: 'Europe',
-    AF: 'Africa',
-    AS: 'Asia',
-    NA: 'North America',
-    SA: 'South America',
-    OC: 'Oceania'
-};
 
 var CONTINENTS_COUNTRIES_MAP = {
     EU: ['DE-sky', 'UK-sky', 'IT-sky', 'FR-sky'],
@@ -52,18 +42,19 @@ function testRequest() {
     })
 }
 
-function getCheapeastPlacesFromPlaceToContinent(from, to) {
+function getCheapeastPlacesFromPlaceToContinent(from, to, callback) {
     var urls = to.map(function(country) {
         return routesUrl.format(from, country, skyscannerKey);
     });
 
     async.map(urls, performGet, function (error, result) {
         if (error) {
-            console.log("Error getting places from: " + from + " to: " + to)
+            console.log("Error getting places from: " + from + " to: " + to);
+            callback(error)
         } else {
-            return parseRoutesForCheapestDestinations(result.map(function(jsonString) {
+            callback(null, parseRoutesForCheapestDestinations(result.map(function(jsonString) {
                 return JSON.parse(jsonString);
-            }));
+            })));
         }
     });
 }
@@ -76,6 +67,38 @@ function parseRoutesForCheapestDestinations(routeResults) {
     var allRoutes = [].concat.apply([], routeResults.map(function(routeResult) {
         return routeResult.Routes
     }));
+
+    allRoutes.sort(function(a, b) {
+        return a.Price - b.Price;
+    });
+
+    allRoutes = allRoutes.slice(0, 10);
+
+    for (var routeIndex in allRoutes) {
+        var route = allRoutes[routeIndex];
+        var destination = placeForId(route.DestinationId, allPlaces);
+        cheapestPlaces.push({"destination": destination, "price": route.Price});
+    }
+    return cheapestPlaces;
+}
+
+
+function getCheapeastPlacesFromPlaceToCountry(from, to, callback) {
+    var url = routesUrl.format(from, to, skyscannerKey);
+    performGet(url, function(error, result) {
+        if (error) {
+            console.log("Error getting places from: " + from + " to: " + to);
+            callback(error);
+        } else {
+            callback(null, parseRouteForCheapestDestinations(JSON.parse(result)));
+        }
+    });
+}
+
+function parseRouteForCheapestDestinations(routeResult) {
+    var cheapestPlaces = [];
+    var allPlaces = routeResult.Places;
+    var allRoutes = routeResult.Routes;
 
     allRoutes.sort(function(a, b) {
         return a.Price - b.Price;
@@ -105,25 +128,33 @@ function performGet(url, callback) {
         if (!error && response.statusCode == 200) {
             callback(null, body);
         } else {
-            console.log("GET Error. Statuscode: " + response.statusCode + ". Error: " + error.toString());
-            callback(error);
+            if (error) {
+                console.log("GET Error. Statuscode: " + response.statusCode + ". Error: " + error.toString());
+                callback(error);
+
+            }
+            console.log("GET bad statuscode. Statuscode: " + response.statusCode);
+            callback(new Error("Bad statuscode"));
         }
     })
 }
 
 
-function suggestId(query) {
+function suggestId(query, callback) {
     var url = suggestUrl.format(query, skyscannerKey);
-    request(url, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            return JSON.parse(body).Places[0].PlaceId
+
+    async.map([url], performGet, function (error, result) {
+        if (error) {
+            console.log("Error getting places from: " + from + " to: " + to);
+            callback(error);
         } else {
-            console.log("GET Error. Statuscode: " + response.statusCode + ". Error: " + error.toString());
+           callback(null, JSON.parse(result[0]).Places[0].PlaceId);
         }
-    })
+    });
 }
 
 module.exports = {testRequest: testRequest,
     getCheapeastPlacesFromPlaceToContinent: getCheapeastPlacesFromPlaceToContinent,
+    getCheapeastPlacesFromPlaceToCountry: getCheapeastPlacesFromPlaceToCountry,
     suggestId: suggestId,
     CONTINENTS_COUNTRIES_MAP: CONTINENTS_COUNTRIES_MAP};

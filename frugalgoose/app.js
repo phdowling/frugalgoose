@@ -5,6 +5,7 @@
 
 var express = require('express');
 var routes = require('./routes');
+var destination = require('./routes/destination')
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
@@ -34,6 +35,8 @@ app.locals.something = 'value';
 app.locals.qaz = 'qut';
 
 app.get('/', routes.index);
+app.get('/destinations', destination.destinations);
+// app.get('/things', routes.things)
 app.get('/users', user.list);
 
 http.createServer(app).listen(app.get('port'), function(){
