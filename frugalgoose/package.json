@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node $NODE_DEBUG_OPTION app.js"
   },
   "dependencies": {
+    "async": "^2.1.1",
     "errorhandler": "^1.4.3",
     "express": "^4.13.4",
     "express-react-views": "latest",
