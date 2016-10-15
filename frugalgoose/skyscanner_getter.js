@@ -134,12 +134,27 @@ function suggestId(query, callback) {
 
     performGet(url, function (error, result) {
         if (error) {
+            console.log("Error getting ID. " + error.toString());
+            callback(error);
+        } else {
+            callback(null, JSON.parse(result).Places[0].PlaceId);
+        }
+    });
+}
+
+function getBookingUrl(from, to, callback) {
+
+    var url = suggestUrl.format(query, skyscannerKey);
+
+    performGet(url, function (error, result) {
+        if (error) {
             console.log("Error getting places from: " + from + " to: " + to);
             callback(error);
         } else {
             callback(null, JSON.parse(result).Places[0].PlaceId);
         }
     });
+
 }
 
 module.exports = {testRequest: testRequest,
