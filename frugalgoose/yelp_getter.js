@@ -4,7 +4,9 @@
 
 var config = require('./config.json');
 
-var request = require('request');
+var request = require('request')
+    ,   cachedRequest = require('cached-request')(request)
+    ,   cacheDirectory = "/tmp/goose-cache";
 var async = require('async');
 require('./string_format');
 var yelpToken = config.yelpToken;
@@ -22,7 +24,7 @@ function testRequest() {
             "Authorization": yelpToken
         }
     };
-    request(options, function (error, response, body) {
+    cachedRequest(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             console.log(body); // Show the HTML for the Google homepage.
         } else {
@@ -36,7 +38,7 @@ function getThings(place, callback) {
 
     performGet(url, function (error, result) {
         if (error) {
-            console.log("Error getting places from: " + from + " to: " + to);
+            console.log("Error getting places from : " + place + ". Error: " + error.toString());
             callback(error);
         } else {
             callback(null, JSON.parse(result));
@@ -50,7 +52,7 @@ function getHotels(place, callback) {
 
     performGet(url, function (error, result) {
         if (error) {
-            console.log("Error getting places from: " + from + " to: " + to);
+            console.log("Error getting hotels from : " + place + ". Error: " + error.toString());
             callback(error);
         } else {
             callback(null, JSON.parse(result));
@@ -68,7 +70,7 @@ function performGet(url, callback) {
         }
     };
 
-    request(options, function (error, response, body) {
+    cachedRequest(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             callback(null, body);
         } else {

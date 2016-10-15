@@ -4,7 +4,9 @@
 
 var config = require('./config.json');
 
-var request = require('request');
+var request = require('request')
+    ,   cachedRequest = require('cached-request')(request)
+    ,   cacheDirectory = "/tmp/goose-cache";
 var async = require('async');
 require('./string_format');
 var skyscannerKey = config.skyscannerKey;
@@ -15,7 +17,10 @@ var referralUrl = "http://partners.api.skyscanner.net/apiservices/referral/v1.0/
 
 
 function testRequest() {
-    request('http://www.google.com', function (error, response, body) {
+    var options = {
+        url: 'http://www.google.com'
+    };
+    cachedRequest(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             console.log(body); // Show the HTML for the Google homepage.
         } else {
@@ -128,7 +133,7 @@ function getBookingUrl(from, to, callback) {
         followRedirect: false
     };
 
-    request(options, function(error, response, body) {
+    cachedRequest(options, function(error, response, body) {
         if (!error && response.statusCode == 302) {
             callback(null, response.headers.location);
         } else {
@@ -138,7 +143,10 @@ function getBookingUrl(from, to, callback) {
 }
 
 function performGet(url, callback, ignoreError) {
-    request(url, function (error, response, body) {
+    var options = {
+        url: url
+    };
+    cachedRequest(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             callback(null, body);
         } else {
