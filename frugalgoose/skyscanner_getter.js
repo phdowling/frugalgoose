@@ -51,6 +51,8 @@ function parseRoutesForCheapestDestinations(routeResults) {
         return routeResult.Routes
     }));
 
+    allRoutes = allRoutes.filter(function(n){ return n.hasOwnProperty("Price") });
+
     allRoutes.sort(function(a, b) {
         return a.Price - b.Price;
     });
@@ -149,6 +151,7 @@ function performGet(url, callback, ignoreError) {
                 console.log("GET bad statuscode. Statuscode: " + response.statusCode);
                 callback(new Error("Bad statuscode"));
             }
+            console.log("Ignoring failed get for URL: " + url);
             callback(null, null);
         }
     })
