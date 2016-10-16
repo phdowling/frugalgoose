@@ -33,8 +33,8 @@ dispatcher = updater.dispatcher
 
 def shorten_link(url):
     token = keys["linkShorten"]
-    return requests.post("https://www.googleapis.com/urlshortener/v1/url?key=" + token, json={"longUrl": url}).json()["id"]
-
+    response = requests.post("https://www.googleapis.com/urlshortener/v1/url?key=" + token, json={"longUrl": url})
+    return response.json()["id"]
 
 
 continentsToCountries = {}
