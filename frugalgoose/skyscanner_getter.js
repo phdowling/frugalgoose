@@ -14,19 +14,6 @@ var suggestUrl = "http://partners.api.skyscanner.net/apiservices/autosuggest/v1.
 var referralUrl = "http://partners.api.skyscanner.net/apiservices/referral/v1.0/GE/EUR/EN/{0}/{1}/2016-10-18/2016-10-25?apiKey={2}";
 
 
-function testRequest() {
-    var options = {
-        url: 'http://www.google.com'
-    };
-    request(options, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            console.log(body); // Show the HTML for the Google homepage.
-        } else {
-            console.log("GET Error. Statuscode: " + response.statusCode + ". Error: " + error.toString());
-        }
-    })
-}
-
 function getCheapeastPlacesFromPlaceToContinent(from, to, callback) {
     var urls = to.map(function(country) {
         return routesUrl.format(from, country, skyscannerKey);
@@ -167,7 +154,7 @@ function performGetIgnoreError(url, callback) {
     performGet(url, callback, true);
 }
 
-module.exports = {testRequest: testRequest,
+module.exports = {
     getCheapeastPlacesFromPlaceToContinent: getCheapeastPlacesFromPlaceToContinent,
     getCheapeastPlacesFromPlaceToCountry: getCheapeastPlacesFromPlaceToCountry,
     suggestId: suggestId,

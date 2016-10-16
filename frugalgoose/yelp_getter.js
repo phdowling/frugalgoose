@@ -14,23 +14,6 @@ var searchUrl = "https://api.yelp.com/v3/businesses/search?location={0}&categori
 var categories = "landmarks,localflavor,active,nightlife";
 var hotelCategory = "hotelstravel";
 
-function testRequest() {
-    var url = searchUrl.format("Munich");
-    var options = {
-        url: url,
-        headers: {
-            "Authorization": yelpToken
-        }
-    };
-    request(options, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            console.log(body); // Show the HTML for the Google homepage.
-        } else {
-            console.log("GET Error. Statuscode: " + response.statusCode + ". Error: " + error.toString());
-        }
-    });
-}
-
 function getThings(place, callback) {
     var url = searchUrl.format(place, categories);
 
@@ -83,6 +66,6 @@ function performGet(url, callback) {
     })
 }
 
-module.exports = {testRequest: testRequest,
+module.exports = {
     getThings: getThings,
     getHotels: getHotels};
