@@ -4,9 +4,7 @@
 
 var config = require('./config.json');
 
-var request = require('request')
-    ,   cachedRequest = require('cached-request')(request)
-    ,   cacheDirectory = "/tmp/goose-cache";
+var request = require('request');
 var async = require('async');
 require('./string_format');
 var yelpToken = config.yelpToken;
@@ -24,7 +22,7 @@ function testRequest() {
             "Authorization": yelpToken
         }
     };
-    cachedRequest(options, function (error, response, body) {
+    request(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             console.log(body); // Show the HTML for the Google homepage.
         } else {
@@ -70,7 +68,7 @@ function performGet(url, callback) {
         }
     };
 
-    cachedRequest(options, function (error, response, body) {
+    request(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             callback(null, body);
         } else {
