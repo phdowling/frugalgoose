@@ -13,6 +13,7 @@ var searchUrl = "https://api.yelp.com/v3/businesses/search?location={0}&categori
 
 var categories = "landmarks,localflavor,active,nightlife";
 var hotelCategory = "hotelstravel";
+var restaurantCategory = "restaurants";
 
 function getThings(place, callback) {
     var url = searchUrl.format(place, categories);
@@ -34,6 +35,35 @@ function getHotels(place, callback) {
     performGet(url, function (error, result) {
         if (error) {
             console.log("Error getting hotels from : " + place + ". Error: " + error.toString());
+            callback(error);
+        } else {
+            callback(null, JSON.parse(result));
+        }
+    });
+
+}
+
+function getRestaurants(place, type, callback) {
+
+    if (type == "american") {
+        var url = searchUrl.format(place, "newamerican,tradamerican");
+    } else if (type == "chinese") {
+        var url = searchUrl.format(place, "chinese");
+    } else if (type == "japanese") {
+        var url = searchUrl.format(place, "japanese");
+    } else if (type == "mexican") {
+        var url = searchUrl.format(place, "mexican,newmexican");
+    } else if (type == "vietnamese") {
+        var url = searchUrl.format(place, "vietnamese");
+    } else if (type == "german") {
+        var url = searchUrl.format(place, "german");
+    } else {
+        var url = searchUrl.format(place, restaurantCategory);
+    }
+
+    performGet(url, function (error, result) {
+        if (error) {
+            console.log("Error getting restaurants from : " + place + ". Error: " + error.toString());
             callback(error);
         } else {
             callback(null, JSON.parse(result));
@@ -68,4 +98,5 @@ function performGet(url, callback) {
 
 module.exports = {
     getThings: getThings,
-    getHotels: getHotels};
+    getHotels: getHotels,
+    getRestaurants: getRestaurants};

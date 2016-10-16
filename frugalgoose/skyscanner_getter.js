@@ -61,7 +61,7 @@ function parseRoutesForCheapestDestinations(routeResults) {
 function getCheapeastPlacesFromPlaceToCountry(from, to, callback) {
     var url = routesUrl.format(from, to, skyscannerKey);
     performGet(url, function(error, result) {
-        if (error) {
+        if (error || !result) {
             console.log("Error getting places from: " + from + " to: " + to);
             callback(error);
         } else {

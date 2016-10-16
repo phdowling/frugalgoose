@@ -41,3 +41,26 @@ exports.hotels = function(req, res) {
         res.end();
     }
 };
+
+exports.restaurants = function(req, res) {
+    if (req.query.hasOwnProperty("place")) {
+        var type = null;
+        if (req.query.hasOwnProperty("type")) {
+            type = req.query.type;
+        }
+        yelpGetter.getRestaurants(req.query.place, type, function(error, hotels) {
+            if (error) {
+                res.writeHead(401);
+                res.end();
+            } else {
+                res.setHeader('Content-Type', 'application/json');
+                res.writeHead(200);
+                res.write(JSON.stringify(hotels));
+                res.end();
+            }
+        });
+    } else {
+        res.writeHead(401);
+        res.end();
+    }
+};

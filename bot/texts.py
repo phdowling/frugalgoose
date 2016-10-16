@@ -28,7 +28,19 @@ yelp_hotels = [
     lambda hotel: u"What about %s?" % hotel,
     lambda hotel: u"You'll love the beds at %s?" % hotel,
     lambda hotel: u"I personally would stay at %s" % hotel,
-    lambda hotel: u"I've once spend a night at %s, I loved it!" % hotel,
+    lambda hotel: u"I've once spend a night at %s, I loved it!" % hotel
+]
+yelp_before_restaurants = [
+    lambda city: u"The food in %s is always great!" % city,
+    lambda city: u"You're making me hungry...",
+    lambda city: u"Hands down, %s has the best food in the world." % city
+]
+yelp_restaurants = [
+    lambda hotel: u"Satisfy your Yum-Needs at %s" % hotel,
+    lambda hotel: u"What about %s?" % hotel,
+    lambda hotel: u"The last time I was at %s, it was crazily good!" % hotel,
+    lambda hotel: u"I personally would go to %s. But hey, you're choice!" % hotel,
+    lambda hotel: u"Yum, yum yum at %s! " % hotel
 ]
 yelp_place_first = [
     lambda place: u'There\'s %s' % place,

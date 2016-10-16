@@ -98,12 +98,28 @@ def resolve_command(chat_id, message):
     if "flights" in message or "travel" in message or "go to" in message:
         return "destination_search", find_dest_in_text(message)
 
-    if "tell me" in message or "sounds nice" in message or "what about" in message or ("show me" in message and not ("pic" in message or "photo" in message)):
+    if not "hotel" in message and not "accommodation" in message and not "restaurant" in message and ("tell me" in message or "sounds nice" in message or "what about" in message or "how about" in message or ("show me" in message and not ("pic" in message or "photo" in message))):
         return "more_info", find_city_in_text(chat_id, message)
 
     if "pictures" in message or "images" in message or ("look like" in message and "what" in message) or "photos" in message or "pics" in message:
         # TODO more info on what?
         return "pictures", find_city_in_text(chat_id, message)
+
+    if "restaurant" in message:
+        if "american" in message:
+            return "americanrestaurants", find_city_in_text(chat_id, message)
+        if "chinese" in message:
+            return "chineserestaurants", find_city_in_text(chat_id, message)
+        if "japanese" in message:
+            return "japaneserestaurants", find_city_in_text(chat_id, message)
+        if "mexican" in message:
+            return "mexicanrestaurants", find_city_in_text(chat_id, message)
+        if "vietnamese" in message:
+            return "vietnameserestaurants", find_city_in_text(chat_id, message)
+        if "german" in message:
+            return "germanrestaurants", find_city_in_text(chat_id, message)
+        else:
+            return "restaurants", find_city_in_text(chat_id, message)
 
     if "hotel" in message or "accommodation" in message:
         return "hotels", find_city_in_text(chat_id, message)
@@ -164,6 +180,9 @@ def language_command_handler(bot, update):
     elif command == "hotels":
         query_hotels(bot, chat_id, args)
 
+    elif "restaurants" in command:
+        query_restaurants(bot, command, chat_id, args)
+
     elif command == "book":
         book_flight(bot, chat_id, args)
 
@@ -218,6 +237,37 @@ def query_hotels(bot, chat_id, city):
     for idx, thing in list(enumerate(bizzes))[:3]:
         name = thing["name"]
         text = random.choice(texts.yelp_hotels)(name)
+        text += (u" (Rating: %s. See %s.)" % (thing["rating"], shorten_link(thing["url"])))
+        if "image_url" in thing and thing["image_url"]:
+            # bot.sendPhoto(chat_id=chat_id, photo=thing["image_url"])
+            bot.sendMessage(chat_id=chat_id, text=text)
+        else:
+            bot.sendMessage(chat_id=chat_id, text=text)
+
+def query_restaurants(bot, command, chat_id, city):
+    if command == "americanrestaurants":
+        type = "american"
+    elif command == "chineserestaurants":
+        type = "chinese"
+    elif command  == "japaneserestaurants":
+        type = "japanese"
+    elif command == "mexicanrestaurants":
+        type = "mexican"
+    elif command == "vietnameserestaurants":
+        type = "vietnamese"
+    elif command == "germanrestaurants":
+        type = "german"
+    else:
+        type = None
+    if type:
+        res = requests.get("http://localhost:3000/restaurants?place={city}&type={type}".format(city=city, type=type))
+    else:
+        res = requests.get("http://localhost:3000/restaurants?place={city}".format(city=city))
+    bizzes = res.json()["businesses"]
+    bot.sendMessage(chat_id=chat_id, text=random.choice(texts.yelp_before_restaurants)(city.capitalize()))
+    for idx, thing in list(enumerate(bizzes))[:3]:
+        name = thing["name"]
+        text = random.choice(texts.yelp_restaurants)(name)
         text += (u" (Rating: %s. See %s.)" % (thing["rating"], shorten_link(thing["url"])))
         if "image_url" in thing and thing["image_url"]:
             # bot.sendPhoto(chat_id=chat_id, photo=thing["image_url"])
