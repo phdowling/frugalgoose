@@ -105,6 +105,9 @@ def resolve_command(chat_id, message):
         # TODO more info on what?
         return "pictures", find_city_in_text(chat_id, message)
 
+    if "hotel" in message or "accommodation" in message:
+        return "hotels", find_city_in_text(chat_id, message)
+
     if "book" in message:
         return "book", find_city_in_text(chat_id, message)
 
@@ -158,6 +161,9 @@ def language_command_handler(bot, update):
     elif command == "pictures":
         query_images(bot, chat_id, args)
 
+    elif command == "hotels":
+        query_hotels(bot, chat_id, args)
+
     elif command == "book":
         book_flight(bot, chat_id, args)
 
@@ -198,6 +204,20 @@ def query_yelp(bot, chat_id, city):
         else:
             text = random.choice(texts.yelp_place_second)(name)
 
+        text += (u" (Rating: %s. See %s.)" % (thing["rating"], shorten_link(thing["url"])))
+        if "image_url" in thing and thing["image_url"]:
+            # bot.sendPhoto(chat_id=chat_id, photo=thing["image_url"])
+            bot.sendMessage(chat_id=chat_id, text=text)
+        else:
+            bot.sendMessage(chat_id=chat_id, text=text)
+
+def query_hotels(bot, chat_id, city):
+    res = requests.get("http://localhost:3000/hotels?place={city}".format(city=city))
+    bizzes = res.json()["businesses"]
+    bot.sendMessage(chat_id=chat_id, text=random.choice(texts.yelp_before_hotels)(city.capitalize()))
+    for idx, thing in list(enumerate(bizzes))[:3]:
+        name = thing["name"]
+        text = random.choice(texts.yelp_hotels)(name)
         text += (u" (Rating: %s. See %s.)" % (thing["rating"], shorten_link(thing["url"])))
         if "image_url" in thing and thing["image_url"]:
             # bot.sendPhoto(chat_id=chat_id, photo=thing["image_url"])

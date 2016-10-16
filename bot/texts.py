@@ -18,6 +18,18 @@ yelp_into = [
     lambda dest: u"Here are some fun places in %s:" % dest,
     lambda dest: u"%s is a very interesting city. Here are some of the popular spots:" % dest
 ]
+yelp_before_hotels = [
+    lambda city: u"I've once spend a night in %s, it was great!" % city,
+    lambda city: u"Why are you looking for hotels, when you can also party all night? But because it's you, here you go:",
+    lambda city: u"Sleeping at %s is even better than a night home." % city
+]
+yelp_hotels = [
+    lambda hotel: u"This place might comfort you well",
+    lambda hotel: u"What about %s?" % hotel,
+    lambda hotel: u"You'll love the beds at %s?" % hotel,
+    lambda hotel: u"I personally would stay at %s" % hotel,
+    lambda hotel: u"I've once spend a night at %s, I loved it!" % hotel,
+]
 yelp_place_first = [
     lambda place: u'There\'s %s' % place,
     lambda place: u'Check out %s' % place,
