@@ -9,7 +9,7 @@ exports.destinations = function(req, res) {
 
         skyscannerGetter.suggestId(req.query.from, function(error, fromId) {
             if (error) {
-                res.writeHead(500);
+                res.writeHead(401);
                 res.end();
             } else {
                 var places = null;
@@ -17,7 +17,7 @@ exports.destinations = function(req, res) {
 
                 var placesCallback = function(error, places) {
                     if (error) {
-                        res.writeHead(500);
+                        res.writeHead(401);
                         res.end();
                     } else {
                         res.setHeader('Content-Type', 'application/json');
@@ -32,7 +32,7 @@ exports.destinations = function(req, res) {
                 } else {
                     skyscannerGetter.suggestId(req.query.to, function(error, toId) {
                         if (error) {
-                            res.writeHead(500);
+                            res.writeHead(401);
                             res.end();
                         } else {
                             skyscannerGetter.getCheapeastPlacesFromPlaceToCountry(fromId, toId, placesCallback);
@@ -43,7 +43,7 @@ exports.destinations = function(req, res) {
         });
 
     } else {
-        res.writeHead(500);
+        res.writeHead(401);
         res.end();
     }
 };
@@ -53,19 +53,19 @@ exports.bookingUrl = function(req, res) {
         skyscannerGetter.suggestId(req.query.from, function(error, fromId) {
             if (error) {
                 console.log("Error getting booking URL: " + error.toString());
-                res.writeHead(500);
+                res.writeHead(401);
                 res.end();
             } else {
                 skyscannerGetter.suggestId(req.query.to, function(error, toId) {
                     if (error) {
                         console.log("Error getting booking URL: " + error.toString());
-                        res.writeHead(500);
+                        res.writeHead(401);
                         res.end();
                     } else {
                         skyscannerGetter.getBookingUrl(fromId, toId, function (error, url) {
                             if (error) {
                                 console.log("Error getting booking URL: " + error.toString());
-                                res.writeHead(500);
+                                res.writeHead(401);
                                 res.end();
                             } else {
                                 res.setHeader('Content-Type', 'application/json');
@@ -81,7 +81,7 @@ exports.bookingUrl = function(req, res) {
             }
         })
     } else {
-        res.writeHead(500);
+        res.writeHead(401);
         res.end();
     }
 };

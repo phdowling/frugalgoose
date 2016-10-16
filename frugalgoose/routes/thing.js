@@ -18,7 +18,7 @@ exports.things = function(req, res) {
             }
         });
     } else {
-        res.writeHead(500);
+        res.writeHead(401);
         res.end();
     }
 };
@@ -27,7 +27,7 @@ exports.hotels = function(req, res) {
     if (req.query.hasOwnProperty("place")) {
         yelpGetter.getHotels(req.query.place, function(error, hotels) {
             if (error) {
-                res.writeHead(500);
+                res.writeHead(401);
                 res.end();
             } else {
                 res.setHeader('Content-Type', 'application/json');
@@ -37,7 +37,7 @@ exports.hotels = function(req, res) {
             }
         });
     } else {
-        res.writeHead(500);
+        res.writeHead(401);
         res.end();
     }
 };
