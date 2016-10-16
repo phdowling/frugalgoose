@@ -14,7 +14,7 @@ yelp_into = [
     lambda dest: u"There is some great stuff to do in %s:" % dest,
     lambda dest: u"%s is great. Let me show you some of the local favorites!" % dest,
     lambda dest: u"Here are some of the best local spots in %s." % dest,
-    lambda dest: u"These places are definitely worth checking out:" % dest,
+    lambda dest: u"These places are definitely worth checking out:",
     lambda dest: u"Here are some fun places in %s:" % dest,
     lambda dest: u"%s is a very interesting city. Here are some of the popular spots:" % dest
 ]

@@ -2,16 +2,18 @@
 import json
 import logging
 import random
+import base64
 
 import requests
 import telegram
-import audiotools
+from pydub import AudioSegment
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 from telegram.ext import Updater
 
 import texts
-from microsoft_apis import search_images, voice_recognize
+from microsoft_apis import search_images
+from google_apis import voice_recognize
 
 
 with open("keys.json") as inf:
@@ -52,9 +54,11 @@ with open("countries.json", "r") as inf1:
 with open("countriesToCities.json", "r") as inf2:
     countries_to_cities = json.load(inf2)
 
+new_countries_to_cities = {}
 for key, val in countries_to_cities.items():
-    countries_to_cities[key.lower()] = val
+    new_countries_to_cities[key.lower()] = val
 
+countries_to_cities = new_countries_to_cities
 
 def start(bot, update):
     bot.sendMessage(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
@@ -113,13 +117,32 @@ def speech_handler(bot, update):
     chat_id = update.message.chat_id
     newFile = bot.getFile(file_id)
     newFile.download('voice%s.ogg' % chat_id)
-    pcm_data = audiotools.open('voice%s.ogg' % chat_id).to_pcm()
-    outfile = open('voice%s.pcm' % chat_id, "wb")
-    resampler = audiotools.pcmconverter.Resampler(pcm_data, 8000)
-    audiotools.transfer_framelist_data(resampler, outfile.write)
-    pcm_data.close()
-    outfile.close()
-    voice_recognize('voice%s.pcm' % chat_id)
+    ogg_file = AudioSegment.from_ogg('voice%s.ogg' % chat_id)
+    ogg_file.export("voice%s.flac" % chat_id, format="flac")
+
+
+    with open("voice%s.flac" % chat_id, 'rb') as speech:
+        # Base64 encode the binary audio file for inclusion in the JSON
+        # request.
+        speech_content = base64.b64encode(speech.read())
+
+    body = {
+        'config': {
+        #     # There are a bunch of config options you can specify. See
+        #     # https://goo.gl/KPZn97 for the full list.
+            'encoding': 'FLAC',  # raw 16-bit signed LE samples
+            'sampleRate': 48000,  # 16 khz
+        #     # See https://goo.gl/A9KJ1A for a list of supported languages.
+            'languageCode': 'en-US',  # a BCP-47 language tag
+        },
+        'audio': {
+            'content': speech_content.decode('UTF-8')
+        }
+    }
+
+    update.message.text = voice_recognize(body)
+    language_command_handler(bot, update)
+
 
 
 def language_command_handler(bot, update):
@@ -155,19 +178,19 @@ def book_flight(bot, chat_id, city):
 def query_dest(bot, chat_id, location, type):
     # TODO query skyscanner
     if not location:
-        location = random.choice(continentsToCountries.keys())
-        bot.sendMessage(chat_id=chat_id, text=(u"Let's see what we can find in %s.." % location.capitalize()).encode("utf-8"))
+        location = random.choice(list(continentsToCountries.keys()))
+        bot.sendMessage(chat_id=chat_id, text=(u"Let's see what we can find in %s.." % location.capitalize()))
     res = requests.get("http://localhost:3000/destinations?from=Bremen&to={location}".format(location=location))
 
     city_prices = [(i["destination"]["CityName"], i.get("price", "??")) for i in res.json()]
-    bot.sendMessage(chat_id=chat_id, text=random.choice(texts.destination_choice)(city_prices).encode("utf-8"))
+    bot.sendMessage(chat_id=chat_id, text=random.choice(texts.destination_choice)(city_prices))
     states[chat_id] = {"last_action": "suggested", "city_prices": city_prices, "last_city": None}
 
 
 def query_yelp(bot, chat_id, city):
     res = requests.get("http://localhost:3000/things?place={city}".format(city=city))
     bizzes = res.json()["businesses"]
-    bot.sendMessage(chat_id=chat_id, text=random.choice(texts.yelp_into)(city.capitalize()).encode("utf-8"))
+    bot.sendMessage(chat_id=chat_id, text=random.choice(texts.yelp_into)(city.capitalize()))
     for idx, thing in list(enumerate(bizzes))[:5]:
         name = thing["name"]
         if idx == 0:
@@ -175,7 +198,7 @@ def query_yelp(bot, chat_id, city):
         else:
             text = random.choice(texts.yelp_place_second)(name)
 
-        text += (u" (Rating: %s. See %s.)" % (thing["rating"], shorten_link(thing["url"]))).encode("utf-8")
+        text += (u" (Rating: %s. See %s.)" % (thing["rating"], shorten_link(thing["url"])))
         if "image_url" in thing and thing["image_url"]:
             # bot.sendPhoto(chat_id=chat_id, photo=thing["image_url"])
             bot.sendMessage(chat_id=chat_id, text=text)
@@ -185,7 +208,7 @@ def query_yelp(bot, chat_id, city):
 
 def query_images(bot, chat_id, city):
     urls = search_images(city + " photo")
-    idxs = range(len(urls))
+    idxs = list(range(len(urls)))
     random.shuffle(idxs)
     bot.sendMessage(chat_id=chat_id, text="Here are some pictures of %s!" % city.capitalize())
     for idx in idxs[:min(len(idxs), int(random.random() * 9) + 1)]:
@@ -196,7 +219,7 @@ def dont_know(bot, chat_id):
     bot.sendMessage(chat_id=chat_id, text="Sorry, I didn't understand that!")
 
 
-# sendImage(bot, update.message.chat_id, "https://i.imgur.com/emxhXFm.jpg", u"was für 1 hackathon".encode("utf-8"))
+# sendImage(bot, update.message.chat_id, "https://i.imgur.com/emxhXFm.jpg", u"was für 1 hackathon")
 def sendImage(bot, chat_id, image_url, text=None):
     bot.sendPhoto(chat_id=chat_id, photo=image_url, caption=text)
 
